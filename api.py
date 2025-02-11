@@ -1,9 +1,9 @@
+import os
 from fastapi import FastAPI, Request
 from fastapi.responses import StreamingResponse, PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 import json
-from main import user_input
-
+from main import user_input  # Assuming user_input is defined in main.py
 
 app = FastAPI()
 
@@ -16,19 +16,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/")
 async def hello_world():
     return PlainTextResponse("Hello from FastAPI")
-
 
 @app.post("/api/data")
 async def qa(request: Request):
     body = await request.json()
     question = body.get("prompt")
     print(f"Received question: {question}")
-
-
 
     def generate_response():
         response = user_input(question)
@@ -44,20 +40,16 @@ async def qa(request: Request):
                 for word in words[:-1]:
                     yield word + " "
                 buffer = words[-1]
-
             except Exception as e:
                 print(f"Error processing chunk: {e}")
                 yield ""
-
         if buffer:
             yield buffer
 
     return StreamingResponse(generate_response(), media_type="text/event-stream")
 
-
-import os
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 4000))  # Use the PORT env variable if available, else default to 4000
+    # Bind to 0.0.0.0 and use the PORT environment variable (defaulting to 10000)
+    port = int(os.environ.get("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
-
