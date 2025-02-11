@@ -55,7 +55,9 @@ async def qa(request: Request):
     return StreamingResponse(generate_response(), media_type="text/event-stream")
 
 
+import os
 if __name__ == "__main__":
     import uvicorn
+    port = int(os.environ.get("PORT", 4000))  # Use the PORT env variable if available, else default to 4000
+    uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
 
-    uvicorn.run(app, host="0.0.0.0", port=4000,reload=True)
