@@ -34,7 +34,14 @@ async def qa(request: Request):
     if result is None:
         return PlainTextResponse("Sorry, something went wrong.", status_code=500)
 
-    return PlainTextResponse(result)
+    # If the result is a dict, extract the text under the key "output_text"
+    if isinstance(result, dict):
+        result_text = result.get("output_text", "")
+    else:
+        result_text = result
+
+    return PlainTextResponse(result_text)
+
 
 
 if __name__ == "__main__":
