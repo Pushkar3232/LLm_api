@@ -78,9 +78,9 @@ def user_input(user_question):
 
 
 if __name__ == "__main__":
-    # raw_text = get_pdf_text([r'C:\Users\Pushkar\ps\portfolio\api\me.pdf'])
-    #
-    # text_chunks = get_text_chunks(raw_text)
-    # get_vector_store(text_chunks)
+    raw_text = get_pdf_text([r'C:\Users\Pushkar\ps\portfolio\api\me.pdf'])
+
+    text_chunks = get_text_chunks(raw_text)
+    get_vector_store(text_chunks)
 
     user_input(input("Enter any Question : "))
