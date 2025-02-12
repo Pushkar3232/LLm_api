@@ -27,24 +27,15 @@ async def qa(request: Request):
     print(question)
     print(f"Received question: {question}")
 
-    # Call the user_input function and collect its entire output.
-    # Here we assume that user_input(question) returns an iterable of JSON strings.
-    responses = []
-    for part in user_input(question):
-        # Decode if needed
-        if isinstance(part, bytes):
-            part = part.decode("utf-8")
-        try:
-            # Parse each JSON string and extract the 'response' field.
-            data = json.loads(part)
-            responses.append(data.get("response", ""))
-        except Exception as e:
-            print(f"Error processing part: {e}")
-            continue
+    # Call the user_input function and get its output directly.
+    result = user_input(question)
 
-    # Combine all parts into one final response.
-    complete_response = "".join(responses)
-    return PlainTextResponse(complete_response)
+    # Optionally, handle the case where result is None.
+    if result is None:
+        return PlainTextResponse("Sorry, something went wrong.", status_code=500)
+
+    return PlainTextResponse(result)
+
 
 if __name__ == "__main__":
     import uvicorn
