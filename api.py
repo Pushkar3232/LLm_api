@@ -1,8 +1,8 @@
 import os
-from fastapi import FastAPI, Request
-from fastapi.responses import StreamingResponse, PlainTextResponse
-from fastapi.middleware.cors import CORSMiddleware
 import json
+from fastapi import FastAPI, Request
+from fastapi.responses import PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
 from main import user_input  # Assuming user_input is defined in main.py
 
 app = FastAPI()
@@ -24,32 +24,29 @@ async def hello_world():
 async def qa(request: Request):
     body = await request.json()
     question = body.get("prompt")
+    print(question)
     print(f"Received question: {question}")
 
-    def generate_response():
-        response = user_input(question)
-        buffer = ""
-        for chunk in response:
-            try:
-                if isinstance(chunk, bytes):
-                    chunk = chunk.decode("utf-8")
-                chunk_dict = json.loads(chunk)
-                chunk_text = chunk_dict.get("response", "")
-                combined_text = buffer + chunk_text
-                words = combined_text.split(" ")
-                for word in words[:-1]:
-                    yield word + " "
-                buffer = words[-1]
-            except Exception as e:
-                print(f"Error processing chunk: {e}")
-                yield ""
-        if buffer:
-            yield buffer
+    # Call the user_input function and collect its entire output.
+    # Here we assume that user_input(question) returns an iterable of JSON strings.
+    responses = []
+    for part in user_input(question):
+        # Decode if needed
+        if isinstance(part, bytes):
+            part = part.decode("utf-8")
+        try:
+            # Parse each JSON string and extract the 'response' field.
+            data = json.loads(part)
+            responses.append(data.get("response", ""))
+        except Exception as e:
+            print(f"Error processing part: {e}")
+            continue
 
-    return StreamingResponse(generate_response(), media_type="text/event-stream")
+    # Combine all parts into one final response.
+    complete_response = "".join(responses)
+    return PlainTextResponse(complete_response)
 
 if __name__ == "__main__":
     import uvicorn
-    # Bind to 0.0.0.0 and use the PORT environment variable (defaulting to 10000)
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run(app, host="0.0.0.0", port=port, reload=True)
