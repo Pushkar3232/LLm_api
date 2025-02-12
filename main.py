@@ -66,10 +66,14 @@ def user_input(user_question):
     chain = get_conversational_chain()
 
     response = chain(
-        {"input_documents": docs, "question": user_question}, return_only_outputs=True)
+        {"input_documents": docs, "question": user_question},
+        return_only_outputs=True
+    )
 
     print(response)
-    st.write("Reply: ", response["output_text"])
+
+    return response
+
 
 
 
